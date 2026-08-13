@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: tcg-api-postgres
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: pg-user
+      POSTGRES_PASSWORD: pg-pass
+      POSTGRES_DB: tcg-api
+    volumes:
+      - ./.data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U pg-user -d tcg-api']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    container_name: tcg-api
+    restart: unless-stopped
+    ports:
+      - '8080:8080' # public GraphQL (+ /graphiql playground, /healthz)
+      - '50051:50051' # gRPC (service-to-service)
+    develop:
+      # `make dev` (docker compose up --watch) rebuilds the image and
+      # restarts the container whenever Go sources change.
+      watch:
+        - action: rebuild
+          path: ./cmd
+        - action: rebuild
+          path: ./internal
+        - action: rebuild
+          path: ./go.mod
+        - action: rebuild
+          path: ./go.sum
+        - action: rebuild
+          path: ./proto
+        - action: rebuild
+          path: ./Dockerfile
+    environment:
+      # Service-to-service hostname inside the compose network
+      DATABASE_URL: postgres://pg-user:pg-pass@postgres:5432/tcg-api?sslmode=disable
+      API_TOKEN: ${API_TOKEN:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:8080/healthz']
+      interval: 10s
+      timeout: 3s
+      retries: 5

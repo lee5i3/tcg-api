@@ -1,0 +1,30 @@
+# Security vulnerability checks for the Node.js side (all npm workspaces
+# resolve through the root lockfile). "checks-nodejs" is a required status
+# check for merging PRs.
+name: checks-nodejs
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 6 * * 1" # weekly, so new advisories surface without a PR
+
+jobs:
+  checks-nodejs:
+    name: checks-nodejs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      # Production dependencies must be clean at high+; dev-dependency noise
+      # is reported separately without failing the check.
+      - name: audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+      - name: audit dev dependencies (informational)
+        run: npm audit --audit-level=high || true

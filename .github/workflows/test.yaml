@@ -1,0 +1,36 @@
+# Unit tests only (security checks live in checks-*.yaml, image builds in
+# build.yaml). The "test" job is a required status check for merging PRs —
+# mark it required under Settings → Branches → branch protection.
+name: test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+          cache-dependency-path: |
+            libs/card-catalog-store/go.sum
+            libs/httpapi/go.sum
+            libs/user-accounts/go.sum
+            apps/api/game-routes/go.sum
+            apps/api/auth-routes/go.sum
+            apps/api/set-routes/go.sum
+            apps/api/card-routes/go.sum
+            apps/jobs/pokemon-price-updater/go.sum
+
+      - run: npm ci
+      - run: npx nx run-many -t test

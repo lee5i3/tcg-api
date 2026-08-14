@@ -1,0 +1,326 @@
+/* Public catalog app. Brand tokens and element defaults come from
+   @tcg/design-system (tokens.css + base.css, imported in +layout.svelte);
+   this file only holds app-specific layout on top of them. */
+
+.app-main {
+  max-width: var(--ds-measure);
+  margin: 0 auto;
+  padding: var(--ds-space-5);
+}
+
+.header-user {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-color-muted);
+}
+
+.breadcrumbs {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-color-muted);
+}
+
+.breadcrumbs a {
+  color: var(--ds-color-muted);
+}
+
+.breadcrumbs a:hover {
+  color: var(--ds-color-accent-strong);
+}
+
+.status {
+  color: var(--ds-color-muted);
+}
+
+.status-error {
+  color: var(--ds-color-danger-text);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-space-4);
+  margin-bottom: 1.25rem;
+}
+
+.side-link {
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+}
+
+.search-box {
+  display: flex;
+  gap: var(--ds-space-2);
+}
+
+.search-box input {
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--ds-color-border-strong);
+  border-radius: var(--ds-radius-md);
+  font-size: var(--ds-text-md);
+  min-width: 16rem;
+  background: var(--ds-color-surface);
+  color: var(--ds-color-ink);
+  box-shadow: var(--ds-shadow-xs);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: var(--ds-color-accent);
+  box-shadow: 0 0 0 3px var(--ds-color-accent-soft);
+}
+
+/* ---- Game / set tiles --------------------------------------------------- */
+
+.tile-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: var(--ds-space-4);
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-1);
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-xs);
+  padding: var(--ds-space-4);
+  height: 100%;
+  color: var(--ds-color-ink);
+  text-decoration: none;
+  transition:
+    box-shadow 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.tile:hover {
+  border-color: var(--ds-color-accent-border);
+  box-shadow: var(--ds-shadow-md);
+  transform: translateY(-2px);
+  color: var(--ds-color-ink);
+  text-decoration: none;
+}
+
+.tile-logo {
+  max-height: 3rem;
+  max-width: 100%;
+  object-fit: contain;
+  align-self: flex-start;
+  margin-bottom: var(--ds-space-2);
+}
+
+.tile-title {
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: var(--ds-tracking-tight);
+}
+
+.tile-meta {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Card grid ------------------------------------------------------------ */
+
+.card-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: var(--ds-space-4);
+}
+
+.card-tile {
+  display: flex;
+  flex-direction: column;
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-xs);
+  overflow: hidden;
+  height: 100%;
+  color: var(--ds-color-ink);
+  text-decoration: none;
+  transition:
+    box-shadow 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.card-tile:hover {
+  border-color: var(--ds-color-accent-border);
+  box-shadow: var(--ds-shadow-md);
+  transform: translateY(-2px);
+  color: var(--ds-color-ink);
+  text-decoration: none;
+}
+
+.card-image {
+  width: 100%;
+  aspect-ratio: 5 / 7;
+  object-fit: contain;
+  background: var(--ds-color-surface-sunken);
+}
+
+.card-image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ds-color-muted);
+  font-size: var(--ds-text-sm);
+}
+
+.card-tile-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.65rem 0.85rem 0.75rem;
+}
+
+.card-name {
+  font-weight: var(--ds-weight-semibold);
+  font-size: var(--ds-text-md);
+  letter-spacing: var(--ds-tracking-tight);
+}
+
+.card-meta {
+  font-size: 0.8rem;
+  color: var(--ds-color-muted);
+}
+
+/* Prices: accent, semibold, tabular numerals. */
+.card-price {
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  color: var(--ds-color-accent-strong);
+}
+
+/* ---- Card detail ------------------------------------------------------------ */
+
+.card-detail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-6);
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-sm);
+  padding: var(--ds-space-5);
+}
+
+.card-detail-image img,
+.card-detail-image .card-image-placeholder {
+  width: 16rem;
+  max-width: 100%;
+  aspect-ratio: 5 / 7;
+  object-fit: contain;
+  background: var(--ds-color-surface-sunken);
+  border-radius: var(--ds-radius-md);
+}
+
+.card-detail-body {
+  flex: 1;
+  min-width: 16rem;
+}
+
+.card-detail-body h1 {
+  margin-top: 0;
+}
+
+.card-facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--ds-space-1) var(--ds-space-4);
+  margin: 0;
+}
+
+.card-facts dt {
+  color: var(--ds-color-muted);
+  font-size: var(--ds-text-sm);
+}
+
+.card-facts dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.variant-table {
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 28rem;
+}
+
+.variant-table th,
+.variant-table td {
+  text-align: left;
+  padding: 0.45rem 0.75rem;
+  border-bottom: 1px solid var(--ds-color-border);
+}
+
+.variant-table th {
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-color-muted);
+}
+
+.variant-table td:last-child {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-color-accent-strong);
+}
+
+/* ---- Auth pages: dark split-screen -------------------------------------- */
+/* The shell (columns, brand, right panel) is AuthSplit + AuthShell; these
+   classes style the form block both /login and /register render inside it. */
+
+.auth-title {
+  margin: 0 0 var(--ds-space-2);
+  font-size: 1.6rem;
+  color: var(--ds-color-on-dark);
+}
+
+.auth-subtitle {
+  margin: 0 0 var(--ds-space-5);
+  font-size: var(--ds-text-md);
+  color: var(--ds-color-on-dark-muted);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+  margin-top: var(--ds-space-4);
+}
+
+/* Full-width actions (applied via the Button class prop). */
+.auth-btn {
+  width: 100%;
+}
+
+/* Thin "or" divider between the primary action and the alternate one. */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  margin: var(--ds-space-4) 0;
+  font-size: var(--ds-text-xs);
+  color: var(--ds-color-on-dark-muted);
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--ds-color-dark-line);
+}

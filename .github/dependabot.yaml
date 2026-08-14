@@ -1,0 +1,40 @@
+# Keep GitHub Actions, Node.js, and Go dependencies fresh. Weekly, grouped
+# where updates are low-risk, so the PR stream stays manageable.
+version: 2
+
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # npm workspaces all resolve through the root manifest/lockfile.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: gomod
+    directories:
+      - /libs/card-catalog-store
+      - /libs/httpapi
+      - /libs/user-accounts
+      - /apps/api/game-routes
+      - /apps/api/set-routes
+      - /apps/api/card-routes
+      - /apps/api/auth-routes
+      - /apps/jobs/pokemon-price-updater
+      - /tools/local-gateway
+    schedule:
+      interval: weekly
+    groups:
+      aws-sdk:
+        patterns: ["github.com/aws/*"]
+      go-minor-and-patch:
+        update-types: [minor, patch]

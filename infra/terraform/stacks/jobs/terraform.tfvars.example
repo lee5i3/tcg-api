@@ -1,0 +1,6 @@
+# Copy to terraform.tfvars (gitignored) and fill in. This deploys PRODUCTION.
+aws_region = "us-east-1"
+
+# The updater stays disabled until a real feed is configured.
+price_api_url         = ""
+price_updater_enabled = false

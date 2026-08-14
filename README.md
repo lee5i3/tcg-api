@@ -1,94 +1,79 @@
-# TCG API
+# TCG Catalog
 
-A standalone trading-card catalog service in Go, backed by PostgreSQL. It
-stores card sets, cards, and price history for one or more TCGs and exposes
-two surfaces over one catalog:
+A serverless trading-card catalog for multiple TCGs (Pokémon, Magic, Lorcana,
+sports cards): games → sets → cards → variants with current prices.
 
-- **gRPC** (`:50051`) — the trusted service-to-service API with full
-  read/write access. Companion services (scrapers, pricing jobs, importers)
-  push data in through it; the catalog never pulls from an upstream source.
-- **GraphQL** (`:8080/graphql`) — the public read-only query API, with an
-  embedded GraphiQL playground at [`/graphiql`](http://localhost:8080/graphiql).
+Everything runs on AWS — container-image Go Lambdas behind an API Gateway
+HTTP API, a DynamoDB single table, and three static SvelteKit sites
+(marketing, app, admin) on S3 + CloudFront — provisioned by Terraform in four
+independent stacks and organized as an NX monorepo. Two languages:
+**TypeScript for the web, Go for the Lambdas.**
 
-## Data model
-
-- **Prices are history, not fields.** Every price observation lands as a
-  snapshot row in `card_prices`; a card holds `price_id`, a reference to its
-  latest snapshot. Recording an unchanged price is a no-op
-  (`recorded: false`), so pushers can submit unconditionally without
-  flooding the history.
-- **Set sizes are never stored.** `cardCount` is always a live count of the
-  cards table.
-- **Everything has a GUID `id` (first column) plus an immutable `key`.**
-  Games (`pokemon`), sets (`sv3pt5`), and cards (`base1-4`) all follow the
-  same pattern, and every lookup accepts either the GUID or the key.
-- **Sets reference games and series by GUID.** A `series` table groups a
-  game's sets ("Scarlet & Violet", "Sword & Shield"); series rows are created
-  on demand when a set names one. Sets also carry `symbol` (what the set
-  symbol depicts — "mew" for 151) and a real `date` release date.
-
-Tables: `games`, `series`, `sets`, `cards`, `card_prices` — see
-[internal/postgres/schema.sql](internal/postgres/schema.sql), applied
-idempotently at boot.
-
-## Running
-
-```sh
-make dev    # PostgreSQL 17 + the service, rebuilt on code changes
+```
+apps/
+  api/game-routes/       λ api-game-routes  ┐ one NX project, Go module,
+  api/set-routes/        λ api-set-routes   ├ and Dockerfile per function
+  api/card-routes/       λ api-card-routes  ┘
+  jobs/pokemon-price-updater/  λ scheduled price refresh (EventBridge)
+  marketing/             product front door: features, pricing, CTA → app (SvelteKit)
+  app/                   public catalog browser (SvelteKit)
+  admin/                 catalog management — token login, separate site (SvelteKit)
+libs/                    shared modules, flat, named for their function
+  card-catalog-store/    card-catalog domain + DynamoDB persistence (Go)
+  httpapi/               Lambda routing/auth/error plumbing (Go)
+  api-client/            @tcg/api-client — API types + client (TS)
+tools/
+  local-gateway/         docker-compose stand-in for API Gateway (Go)
+  scripts/               DynamoDB Local + ECR push helpers
+infra/
+  terraform/stacks/      database · api · jobs · sites — applied independently
+.github/                 test / checks-nodejs / checks-golang / build / infra + dependabot
+docs/                    Architecture, data model, API reference, ADRs
+MEMORY.md                Log of Claude requests and outcomes
 ```
 
-`make dev` runs `docker compose up --build --watch`. Other targets:
-`make up` (detached), `make down`, `make logs`, `make check`
-(build + vet + test + gofmt), and `make proto` (regenerate gRPC code).
-Run `make` to list them all.
-
-To skip Docker for the service itself:
+## Quick start
 
 ```sh
-docker compose up -d postgres
-cp .env.example .env           # defaults work for local dev
-go run ./cmd/api               # GraphQL on :8080, gRPC on :50051
+npm install
+npx nx run-many -t test        # all unit tests (Go + Vitest)
+docker compose up --build      # the ENTIRE product locally:
+                               #   marketing :8082 · app :8080 · admin :8081
+                               #   API :3000 · DynamoDB :8000
+npx nx dev app                 # frontend dev server against the compose API
 ```
 
-## gRPC (service-to-service)
+## API in one breath
 
-The contract lives in [proto/tcgapi/v1/catalog.proto](proto/tcgapi/v1/catalog.proto):
-`CatalogService` covers games (list/create), sets (list/create/update/delete),
-cards (list-by-set/search/get/create/update/delete), and prices
-(record/history). Server reflection is enabled, so `grpcurl` works out of the
-box:
+Public reads, bearer-token writes (admin logs in with the token via
+`POST /v1/auth/check`):
 
 ```sh
-grpcurl -plaintext localhost:50051 list tcgapi.v1.CatalogService
-
-grpcurl -plaintext -d '{"game":"pokemon","query":"zapdos"}' \
-  localhost:50051 tcgapi.v1.CatalogService/SearchCards
-
-grpcurl -plaintext -d '{"game":"pokemon","card_id":"sv3pt5-145","price":1.42}' \
-  localhost:50051 tcgapi.v1.CatalogService/RecordPrice
+curl -s "$API/v1/games"
+curl -s "$API/v1/games/pokemon/sets?query=151"
+curl -s "$API/v1/games/pokemon/cards?query=zapdos"
+curl -s "$API/v1/games/pokemon/cards/501773"       # TCGplayer id or GUID
 ```
 
-Auth: set `API_TOKEN` and every call (except reflection) must carry
-`authorization: Bearer <token>` metadata. Leave it empty for local dev.
+Full reference: [docs/api.md](docs/api.md).
 
-Regenerate after editing the proto with `make proto` (needs `buf`,
-`protoc-gen-go`, and `protoc-gen-go-grpc` on your PATH — all installable
-with `go install`).
+## CI / merge gates
 
-## GraphQL (public)
+PRs must pass `test`, `checks-nodejs`, `checks-golang`, and `build` (mark
+them required in branch protection). `build.yaml` publishes Lambda images to
+ECR on main; `infra.yaml` runs Terraform per stack on demand; Dependabot
+updates Actions/npm/Go weekly.
 
-Read-only queries at `POST /graphql`; schema in
-[internal/graphql/schema.go](internal/graphql/schema.go). No mutations — all
-writes go through gRPC. The endpoint is deliberately unauthenticated.
+## More
 
-```sh
-curl -s localhost:8080/graphql -H 'Content-Type: application/json' -d '{
-  "query": "{ searchCards(game: \"pokemon\", query: \"zapdos\") { key name number price } }"
-}'
-```
+- [docs/development.md](docs/development.md) — day-to-day workflows
+- [docs/architecture.md](docs/architecture.md) / [docs/data-model.md](docs/data-model.md)
+- [infra/terraform/README.md](infra/terraform/README.md) — deploying stack by stack
+- [docs/decisions/](docs/decisions/) — why things are the way they are
 
-Queries: `games`, `sets(game, query)`, `setCards(game, setId)`,
-`searchCards(game, query)`, `card(game, id)`, `priceHistory(game, cardId)`.
+## History
 
-The GraphiQL playground at `/graphiql` is fully embedded (no CDN assets),
-consistent with the service being self-contained.
+This began as a single Go service (PostgreSQL + GraphQL + gRPC), was
+converted to a serverless monorepo, and has been reshaped stepwise since —
+the reasoning lives in [docs/decisions/](docs/decisions/) and the request log
+in [MEMORY.md](MEMORY.md).

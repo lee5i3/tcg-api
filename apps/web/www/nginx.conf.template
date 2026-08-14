@@ -1,0 +1,15 @@
+server {
+    listen 80;
+    server_name _;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Fully prerendered static site: serve files directly, fall back to the
+    # prerendered 404 shell for unknown URLs. (No /v1/ API proxy needed here.)
+    error_page 404 /404.html;
+
+    location / {
+        try_files $uri $uri.html $uri/ =404;
+    }
+}

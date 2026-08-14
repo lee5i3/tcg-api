@@ -1,0 +1,23 @@
+{
+  "name": "api-auth-routes",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "implicitDependencies": ["user-accounts", "httpapi"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": { "cwd": "apps/api/auth-routes", "command": "go build ./..." }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": { "cwd": "apps/api/auth-routes", "command": "go test ./..." }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/api/auth-routes",
+        "commands": ["go vet ./...", "test -z \"$(gofmt -l .)\" || (gofmt -l . && exit 1)"]
+      }
+    }
+  }
+}

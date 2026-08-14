@@ -1,0 +1,2 @@
+# Copy to terraform.tfvars (gitignored) and adjust. This deploys PRODUCTION.
+aws_region = "us-east-1"

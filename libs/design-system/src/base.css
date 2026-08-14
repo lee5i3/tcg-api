@@ -1,0 +1,131 @@
+/* @tcg/design-system — element defaults built on the tokens.
+   Import once per app, after tokens.css. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--ds-color-bg);
+  color: var(--ds-color-ink);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-base);
+  line-height: var(--ds-leading-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+a {
+  color: var(--ds-color-accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--ds-color-accent-strong);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Headlines: bold, tight tracking, normal case. */
+h1,
+h2,
+h3 {
+  font-family: var(--ds-font-display);
+  font-weight: var(--ds-weight-bold);
+  letter-spacing: var(--ds-tracking-tight);
+  line-height: var(--ds-leading-tight);
+  color: inherit;
+}
+
+h1 {
+  font-size: var(--ds-text-xl);
+  margin: 0.5rem 0 1rem;
+}
+
+h2 {
+  font-size: var(--ds-text-lg);
+  margin: 1.5rem 0 0.5rem;
+}
+
+h3 {
+  font-size: var(--ds-text-base);
+  margin: 1rem 0 0.5rem;
+}
+
+h4,
+h5,
+h6 {
+  font-family: var(--ds-font-body);
+  font-weight: var(--ds-weight-semibold);
+  line-height: var(--ds-leading-snug);
+}
+
+:focus-visible {
+  outline: var(--ds-focus-ring);
+  outline-offset: var(--ds-focus-ring-offset);
+}
+
+/* Display treatment for non-heading elements (hero lines, stat figures). */
+.ds-display {
+  font-family: var(--ds-font-display);
+  font-weight: var(--ds-weight-bold);
+  letter-spacing: var(--ds-tracking-tighter);
+  line-height: var(--ds-leading-tight);
+}
+
+/* Section eyebrow: small, semibold, accent — normal case. */
+.ds-eyebrow {
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-color-accent);
+  margin: 0 0 0.75rem;
+}
+
+/* Numerals that line up: prices, counts, deltas. */
+.ds-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Benefit bullets with accent check marks. */
+.ds-bullets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ds-bullets li {
+  position: relative;
+  padding-left: 1.5rem;
+  margin-bottom: var(--ds-space-2);
+}
+
+.ds-bullets li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.28em;
+  width: 1em;
+  height: 1em;
+  background-color: var(--ds-color-accent);
+  -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="none" stroke="black" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M2.5 8.5l3.7 3.7L13.5 4"/></svg>')
+    center / contain no-repeat;
+  mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="none" stroke="black" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M2.5 8.5l3.7 3.7L13.5 4"/></svg>')
+    center / contain no-repeat;
+}

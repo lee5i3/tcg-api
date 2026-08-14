@@ -1,37 +1,35 @@
+# Developer entry points. `make` lists targets; `make dev` runs everything.
 .DEFAULT_GOAL := help
 
-.PHONY: help dev up down logs build test vet fmt check
+.PHONY: help dev down logs ps test lint build clean images
 
-help: ## List targets
-	@grep -E '^[a-z]+:.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-8s %s\n", $$1, $$2}'
+help: ## List available targets
+	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*##/ {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-dev: ## Run the stack in watch mode (rebuilds the API on code changes)
-	docker compose up --build --watch
+dev: ## Start the entire dev environment (marketing :8082, app :8080, admin :8081, API :3000, DynamoDB :8000)
+	docker compose up --build
 
-up: ## Run the stack detached
-	docker compose up -d --build
-
-down: ## Stop the stack
+down: ## Stop the dev environment and remove its containers
 	docker compose down
 
-logs: ## Tail the API logs
-	docker compose logs -f app
+logs: ## Tail dev-environment logs
+	docker compose logs -f
 
-build: ## Compile all packages
-	go build ./...
+ps: ## Show dev-environment status
+	docker compose ps
 
-test: ## Run tests
-	go test ./...
+test: ## Run every project's tests (Go + Vitest via NX)
+	npx nx run-many -t test
 
-vet: ## Run go vet
-	go vet ./...
+lint: ## Run every project's linters (go vet/gofmt, svelte-check, terraform fmt)
+	npx nx run-many -t lint
 
-fmt: ## Format Go sources
-	gofmt -w cmd internal
+build: ## Build every project (Lambda compile checks + static site bundles)
+	npx nx run-many -t build
 
-proto: ## Regenerate gRPC code from proto/ (needs buf, protoc-gen-go, protoc-gen-go-grpc in PATH)
-	buf generate
-	buf lint
+images: ## Build and push all Lambda images to ECR (production)
+	tools/scripts/push-images.sh
 
-check: build vet test ## Build + vet + test
-	@gofmt -l cmd internal | tee /dev/stderr | test -z "$$(cat)" || (echo "gofmt needed"; exit 1)
+clean: ## Stop the dev environment and drop volumes + built site output
+	docker compose down --volumes --remove-orphans
+	rm -rf apps/web/app/dist apps/web/admin/dist apps/web/www/dist

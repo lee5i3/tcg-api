@@ -1,0 +1,32 @@
+{
+  "name": "infra",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "implicitDependencies": ["api-game-routes", "api-set-routes", "api-card-routes", "pokemon-price-updater"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "infra/terraform",
+        "commands": [
+          "terraform fmt -check -recursive",
+          "for s in database api jobs sites; do (cd stacks/$s && terraform init -backend=false -input=false > /dev/null && terraform validate) || exit 1; done"
+        ]
+      }
+    },
+    "plan": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "infra/terraform",
+        "command": "cd stacks/${STACK:-database} && terraform plan -out=tfplan"
+      }
+    },
+    "apply": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "infra/terraform",
+        "command": "cd stacks/${STACK:-database} && terraform apply tfplan"
+      }
+    }
+  }
+}

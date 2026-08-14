@@ -1,0 +1,13 @@
+go 1.26.6
+
+use (
+	./apps/api/auth-routes
+	./apps/api/card-routes
+	./apps/api/game-routes
+	./apps/api/set-routes
+	./apps/jobs/pokemon-price-updater
+	./libs/card-catalog-store
+	./libs/httpapi
+	./libs/user-accounts
+	./tools/local-gateway
+)

@@ -1,0 +1,22 @@
+{
+  "name": "@tcg/source",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "workspaces": [
+    "apps/web/app",
+    "apps/web/admin",
+    "apps/web/www",
+    "libs/api-client",
+    "libs/design-system"
+  ],
+  "scripts": {
+    "build": "nx run-many -t build",
+    "test": "nx run-many -t test",
+    "lint": "nx run-many -t lint",
+    "graph": "nx graph"
+  },
+  "devDependencies": {
+    "nx": "^21.3.0"
+  }
+}

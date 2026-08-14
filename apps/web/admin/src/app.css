@@ -1,0 +1,172 @@
+/* Admin catalog management site. Same brand as the public app and marketing
+   site — tokens and element defaults come from @tcg/design-system (imported
+   in +layout.svelte). Light, utilitarian data UI; the header's neutral
+   "Admin" chip identifies the site. */
+
+.admin-main {
+  max-width: var(--ds-measure);
+  margin: 0 auto;
+  padding: var(--ds-space-5);
+}
+
+.breadcrumbs {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-color-muted);
+}
+
+.breadcrumbs a {
+  color: var(--ds-color-muted);
+}
+
+.breadcrumbs a:hover {
+  color: var(--ds-color-accent-strong);
+}
+
+.status {
+  color: var(--ds-color-muted);
+}
+
+.status-error {
+  color: var(--ds-color-danger-text);
+}
+
+/* Section headings above forms/tables. */
+h2 {
+  color: var(--ds-color-ink);
+  font-size: var(--ds-text-base);
+  font-weight: var(--ds-weight-semibold);
+}
+
+/* Login */
+
+/* Forms */
+
+.form,
+.form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-3);
+}
+
+.form {
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-xs);
+  padding: 1.25rem;
+  margin-bottom: var(--ds-space-5);
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-3);
+}
+
+.form-actions {
+  display: flex;
+  gap: var(--ds-space-2);
+  align-items: center;
+}
+
+/* Tables */
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  overflow: hidden;
+  margin-top: var(--ds-space-3);
+  box-shadow: var(--ds-shadow-xs);
+}
+
+.admin-table th,
+.admin-table td {
+  text-align: left;
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid var(--ds-color-border);
+  font-size: var(--ds-text-sm);
+}
+
+.admin-table td {
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-table th {
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-color-muted);
+  background: var(--ds-color-surface-sunken);
+}
+
+.admin-table tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table tbody tr:hover td {
+  background: var(--ds-color-bg);
+}
+
+.admin-table .row-actions {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+
+/* Toolbar (list search) */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-space-3);
+  margin-bottom: var(--ds-space-4);
+}
+
+.toolbar input {
+  padding: 0.5rem 0.85rem;
+  border: 1px solid var(--ds-color-border-strong);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-ink);
+  font-size: var(--ds-text-sm);
+  min-width: 14rem;
+  box-shadow: var(--ds-shadow-xs);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.toolbar input:focus {
+  outline: none;
+  border-color: var(--ds-color-accent);
+  box-shadow: 0 0 0 3px var(--ds-color-accent-soft);
+}
+
+/* ---- Auth page: dark split-screen (matches the app's login) -------------- */
+/* Shell/columns come from AuthSplit + AuthShell; these style the form block. */
+
+.auth-title {
+  margin: 0 0 var(--ds-space-2);
+  font-size: 1.6rem;
+  color: var(--ds-color-on-dark);
+}
+
+.auth-subtitle {
+  margin: 0 0 var(--ds-space-5);
+  font-size: var(--ds-text-md);
+  color: var(--ds-color-on-dark-muted);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+  margin-top: var(--ds-space-4);
+}
+
+.auth-btn {
+  width: 100%;
+}

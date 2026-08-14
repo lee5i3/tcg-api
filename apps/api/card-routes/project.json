@@ -1,0 +1,35 @@
+{
+  "name": "api-card-routes",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "implicitDependencies": [
+    "card-catalog-store",
+    "httpapi"
+  ],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/api/card-routes",
+        "command": "go build ./..."
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/api/card-routes",
+        "command": "go test ./..."
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/api/card-routes",
+        "commands": [
+          "go vet ./...",
+          "test -z \"$(gofmt -l .)\" || (gofmt -l . && exit 1)"
+        ]
+      }
+    }
+  }
+}

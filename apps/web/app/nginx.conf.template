@@ -1,0 +1,33 @@
+server {
+    listen 80;
+    server_name _;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Resolve the gateway at request time via Docker's embedded DNS so nginx
+    # survives starting before (or without) the gateway container.
+    resolver 127.0.0.11 valid=10s ipv6=off;
+    set $gateway "${GATEWAY_URL}";
+
+    # API and health checks are proxied to the gateway on the compose network.
+    location /v1/ {
+        proxy_pass $gateway;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location = /healthz {
+        proxy_pass $gateway;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+    }
+
+    # SPA fallback: serve index.html for client-side routes.
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}

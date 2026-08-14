@@ -1,0 +1,154 @@
+# The entire site, locally:
+#
+#   docker compose up --build
+#
+#   www        http://localhost:8082   marketing/landing site (renamed www)
+#   app        http://localhost:8080   public catalog browser
+#   admin      http://localhost:8081   catalog management (token: local-dev-token)
+#   api        http://localhost:3000   REST API (tools/local-gateway → Lambda RIE)
+#   ddb        http://localhost:8000   DynamoDB Local
+#
+# The Lambda containers are the SAME images that deploy to AWS (the AWS base
+# image bundles the Runtime Interface Emulator); local-gateway plays the role
+# of API Gateway. Seed data through the admin UI, or curl:
+#   curl -X POST http://localhost:3000/v1/games/pokemon/sets \
+#     -H 'Authorization: Bearer local-dev-token' -H 'Content-Type: application/json' \
+#     -d '{"key":"sv3pt5","name":"151","releaseDate":"2023-09-22"}'
+#
+# Frontend dev loop tip: run `npx nx dev app` (or admin) against
+# VITE_API_URL=http://localhost:3000 instead of rebuilding these images.
+
+x-lambda-env: &lambda-env
+  TABLE_NAME: tcg-catalog
+  DYNAMODB_ENDPOINT: http://dynamodb:8000
+  API_TOKEN: local-dev-token
+  USER_JWT_SECRET: local-dev-user-secret
+  AWS_ACCESS_KEY_ID: local
+  AWS_SECRET_ACCESS_KEY: local
+  AWS_REGION: us-east-1
+
+services:
+  dynamodb:
+    restart: unless-stopped
+    image: amazon/dynamodb-local:latest
+    command: -jar DynamoDBLocal.jar -sharedDb -inMemory
+    ports:
+      - "8000:8000"
+
+  # One-shot: create the catalog table (same schema Terraform provisions).
+  dynamodb-init:
+    image: amazon/aws-cli:latest
+    depends_on:
+      - dynamodb
+    environment:
+      AWS_ACCESS_KEY_ID: local
+      AWS_SECRET_ACCESS_KEY: local
+      AWS_REGION: us-east-1
+      DYNAMODB_ENDPOINT: http://dynamodb:8000
+      TABLE_NAME: tcg-catalog
+    volumes:
+      - ./tools/scripts/create-local-table.sh:/create-local-table.sh:ro
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["sleep 2 && sh /create-local-table.sh || true"]
+
+  lambda-game-routes:
+    restart: unless-stopped
+    build: { context: ., dockerfile: apps/api/game-routes/Dockerfile }
+    environment: *lambda-env
+    depends_on:
+      - dynamodb-init
+
+  lambda-set-routes:
+    restart: unless-stopped
+    build: { context: ., dockerfile: apps/api/set-routes/Dockerfile }
+    environment: *lambda-env
+    depends_on:
+      - dynamodb-init
+
+  lambda-card-routes:
+    restart: unless-stopped
+    build: { context: ., dockerfile: apps/api/card-routes/Dockerfile }
+    environment: *lambda-env
+    depends_on:
+      - dynamodb-init
+
+  lambda-auth-routes:
+    restart: unless-stopped
+    build: { context: ., dockerfile: apps/api/auth-routes/Dockerfile }
+    environment:
+      <<: *lambda-env
+      # Social login: buttons appear only for providers with credentials.
+      # Point real (test-app) credentials here to try the full flow locally;
+      # the callback URL to register is http://localhost:8080/v1/auth/oauth/<provider>/callback
+      APP_URL: http://localhost:8080
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      FACEBOOK_CLIENT_ID: ${FACEBOOK_CLIENT_ID:-}
+      FACEBOOK_CLIENT_SECRET: ${FACEBOOK_CLIENT_SECRET:-}
+      APPLE_CLIENT_ID: ${APPLE_CLIENT_ID:-}
+      APPLE_CLIENT_SECRET: ${APPLE_CLIENT_SECRET:-}
+    depends_on:
+      - dynamodb-init
+
+  # Plays API Gateway: plain HTTP in, Lambda invoke API out.
+  gateway:
+    restart: unless-stopped
+    build: { context: ., dockerfile: tools/local-gateway/Dockerfile }
+    ports:
+      - "3000:8080"
+    environment:
+      GAME_ROUTES_URL: http://lambda-game-routes:8080
+      SET_ROUTES_URL: http://lambda-set-routes:8080
+      CARD_ROUTES_URL: http://lambda-card-routes:8080
+      AUTH_ROUTES_URL: http://lambda-auth-routes:8080
+    depends_on:
+      - lambda-game-routes
+      - lambda-set-routes
+      - lambda-card-routes
+      - lambda-auth-routes
+
+  app:
+    restart: unless-stopped
+    build: { context: ., dockerfile: apps/web/app/Dockerfile }
+    ports:
+      - "8080:80"
+    environment:
+      GATEWAY_URL: http://gateway:8080
+    depends_on:
+      - gateway
+
+  admin:
+    restart: unless-stopped
+    build: { context: ., dockerfile: apps/web/admin/Dockerfile }
+    ports:
+      - "8081:80"
+    environment:
+      GATEWAY_URL: http://gateway:8080
+    depends_on:
+      - gateway
+
+  www:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: apps/web/www/Dockerfile
+      args:
+        # Baked into the prerendered CTA links at build time — the site is
+        # static, so this is a build arg, not a runtime env var.
+        PUBLIC_APP_URL: ${PUBLIC_APP_URL:-http://localhost:8080}
+    ports:
+      - "8082:80"
+
+  # Scheduled in AWS by EventBridge; run on demand locally:
+  #   docker compose --profile jobs up -d pokemon-price-updater
+  #   curl -d '{}' http://localhost:9100/2015-03-31/functions/function/invocations
+  pokemon-price-updater:
+    profiles: ["jobs"]
+    build: { context: ., dockerfile: apps/jobs/pokemon-price-updater/Dockerfile }
+    ports:
+      - "9100:8080"
+    environment:
+      <<: *lambda-env
+      PRICE_API_URL: ${PRICE_API_URL:-http://host.docker.internal:9999/prices}
+    depends_on:
+      - dynamodb-init

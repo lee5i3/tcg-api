@@ -1,0 +1,49 @@
+# Security vulnerability checks for the Go side: govulncheck against every
+# module. "checks-golang" is a required status check for merging PRs.
+name: checks-golang
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "23 6 * * 1" # weekly, so new advisories surface without a PR
+
+jobs:
+  checks-golang:
+    name: checks-golang
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+          cache-dependency-path: |
+            libs/card-catalog-store/go.sum
+            libs/httpapi/go.sum
+            libs/user-accounts/go.sum
+            apps/api/game-routes/go.sum
+            apps/api/auth-routes/go.sum
+            apps/api/set-routes/go.sum
+            apps/api/card-routes/go.sum
+            apps/jobs/pokemon-price-updater/go.sum
+
+      - run: go install golang.org/x/vuln/cmd/govulncheck@latest
+
+      - name: govulncheck all modules
+        run: |
+          set -euo pipefail
+          for mod in \
+            libs/card-catalog-store \
+            libs/httpapi \
+            libs/user-accounts \
+            apps/api/game-routes \
+            apps/api/set-routes \
+            apps/api/card-routes \
+            apps/api/auth-routes \
+            apps/jobs/pokemon-price-updater \
+            tools/local-gateway
+          do
+            echo "==> $mod"
+            (cd "$mod" && govulncheck ./...)
+          done

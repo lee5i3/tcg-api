@@ -1,0 +1,100 @@
+/* @tcg/design-system — brand tokens.
+   One identity across marketing, app, and admin: a modern collectibles
+   marketplace. Crisp white surfaces for content, a deep near-black navy for
+   hero/marketing panels, one confident blue-violet accent with a subtle
+   gradient, and tabular numerals for prices. */
+
+:root {
+  /* ---- Color: accent (blue-violet) ------------------------------------- */
+  --ds-color-accent: #4f46e5;
+  --ds-color-accent-strong: #4338ca; /* hover / active */
+  --ds-color-accent-soft: #eef2ff; /* tinted chips, hovers, wells */
+  --ds-color-accent-border: #c7d2fe;
+  --ds-color-on-accent: #ffffff;
+  --ds-gradient-accent: linear-gradient(135deg, #4f46e5, #7c3aed);
+
+  /* ---- Color: dark panels (hero, CTA bands, dark header) --------------- */
+  --ds-color-dark: #0b1120;
+  --ds-color-dark-raised: #131b2e; /* cards / panels on dark */
+  --ds-color-dark-line: rgba(148, 163, 184, 0.22); /* borders on dark */
+  --ds-color-on-dark: #f1f5f9;
+  --ds-color-on-dark-muted: #94a3b8;
+
+  /* ---- Color: neutrals (slate) ------------------------------------------ */
+  --ds-color-bg: #f8fafc; /* page ground */
+  --ds-color-surface: #ffffff; /* cards, inputs, raised panels */
+  --ds-color-surface-sunken: #f1f5f9; /* table heads, wells */
+  --ds-color-border: #e2e8f0;
+  --ds-color-border-strong: #cbd5e1;
+  --ds-color-ink: #0f172a;
+  --ds-color-muted: #475569;
+
+  /* ---- Color: semantic (price up / price down, success / danger) -------- */
+  --ds-color-success: #15803d;
+  --ds-color-success-bg: #f0fdf4;
+  --ds-color-success-border: #bbf7d0;
+  --ds-color-up: var(--ds-color-success);
+  --ds-color-danger: #dc2626;
+  --ds-color-danger-text: #b91c1c;
+  --ds-color-danger-bg: #fef2f2;
+  --ds-color-danger-border: #fecaca;
+  --ds-color-down: var(--ds-color-danger-text);
+
+  /* ---- Typography -------------------------------------------------------- */
+  --ds-font-body: "Inter", "Inter Variable", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --ds-font-display: var(--ds-font-body);
+  --ds-font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas,
+    monospace;
+
+  --ds-text-xs: 0.75rem;
+  --ds-text-sm: 0.85rem;
+  --ds-text-md: 0.95rem;
+  --ds-text-base: 1rem;
+  --ds-text-lg: 1.15rem;
+  --ds-text-xl: 1.5rem;
+  --ds-text-2xl: 2rem;
+  --ds-text-hero: clamp(2.4rem, 5.5vw, 3.6rem);
+
+  --ds-weight-normal: 400;
+  --ds-weight-medium: 500;
+  --ds-weight-semibold: 600;
+  --ds-weight-bold: 700;
+
+  --ds-leading-tight: 1.1;
+  --ds-leading-snug: 1.3;
+  --ds-leading-normal: 1.55;
+
+  --ds-tracking-tight: -0.02em; /* bold headlines */
+  --ds-tracking-tighter: -0.03em; /* hero display sizes */
+
+  /* ---- Spacing scale ------------------------------------------------------ */
+  --ds-space-1: 0.25rem;
+  --ds-space-2: 0.5rem;
+  --ds-space-3: 0.75rem;
+  --ds-space-4: 1rem;
+  --ds-space-5: 1.5rem;
+  --ds-space-6: 2rem;
+  --ds-space-7: 3rem;
+  --ds-space-8: 4.5rem;
+
+  /* ---- Radii -------------------------------------------------------------- */
+  --ds-radius-sm: 6px;
+  --ds-radius-md: 10px;
+  --ds-radius-lg: 16px;
+  --ds-radius-xl: 24px;
+  --ds-radius-full: 999px;
+
+  /* ---- Shadows (soft, layered) --------------------------------------------- */
+  --ds-shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --ds-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05), 0 2px 8px rgba(15, 23, 42, 0.05);
+  --ds-shadow-md: 0 2px 4px rgba(15, 23, 42, 0.05), 0 12px 24px rgba(15, 23, 42, 0.09);
+  --ds-shadow-lg: 0 4px 8px rgba(15, 23, 42, 0.05), 0 24px 48px rgba(15, 23, 42, 0.14);
+
+  /* ---- Focus ring ------------------------------------------------------------ */
+  --ds-focus-ring: 2px solid var(--ds-color-accent);
+  --ds-focus-ring-offset: 2px;
+
+  /* ---- Layout ------------------------------------------------------------------ */
+  --ds-measure: 72rem; /* content max-width */
+}

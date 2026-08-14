@@ -4,3 +4,9 @@
 .git/
 bin/
 README.md
+node_modules
+**/node_modules
+**/dist
+**/.svelte-kit
+**/.venv
+.nx

@@ -1,0 +1,62 @@
+# Terraform plan/apply per stack, manually triggered (workflow_dispatch).
+# There is one environment — production.
+#
+# Prerequisites (one-time):
+#   - configure the S3 backend in each stack's `backend "s3" {}` block —
+#     local state does not survive a CI runner — and point the
+#     terraform_remote_state data sources at the same backend
+#   - secret  AWS_ROLE_ARN   — IAM role assumable via GitHub OIDC
+#   - secret  TF_API_TOKEN_VALUE — the API bearer token (api stack)
+#   - var     AWS_REGION
+name: infra
+
+on:
+  workflow_dispatch:
+    inputs:
+      stack:
+        description: Which stack to run
+        required: true
+        type: choice
+        options: [database, api, jobs, sites]
+      action:
+        description: plan or apply
+        required: true
+        type: choice
+        options: [plan, apply]
+        default: plan
+
+jobs:
+  terraform:
+    name: infra-${{ inputs.stack }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    defaults:
+      run:
+        working-directory: infra/terraform/stacks/${{ inputs.stack }}
+    env:
+      TF_IN_AUTOMATION: "true"
+      TF_VAR_api_token: ${{ secrets.TF_API_TOKEN_VALUE }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - run: terraform fmt -check -recursive
+        working-directory: infra/terraform
+
+      - run: terraform init -input=false
+      - run: terraform validate
+
+      - name: terraform plan
+        run: terraform plan -input=false -out=tfplan
+
+      - name: terraform apply
+        if: inputs.action == 'apply'
+        run: terraform apply -input=false tfplan

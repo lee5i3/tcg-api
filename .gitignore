@@ -1,17 +1,29 @@
-# Binaries
-/bin/
-*.exe
+# Node
+node_modules/
+dist/
+.nx/
+.svelte-kit/
 
-# Env
+# Go
+*.test
+apps/api/**/bootstrap
+apps/api/**/*.zip
+go.work.sum
+
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+*.tfvars
+!infra/terraform/stacks/*/terraform.tfvars.example
+tfplan
+
+# Local env
 .env
-.env.*
-!.env.example
+.env.local
 
-# Local data (database volumes)
-.data/
-
-# OS
+# Editors / OS
 .DS_Store
-Thumbs.db
-
-.playwright-mcp
+.idea/
+*.swp

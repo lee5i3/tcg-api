@@ -1,0 +1,24 @@
+# Copy to terraform.tfvars (gitignored) and fill in. This deploys PRODUCTION.
+aws_region = "us-east-1"
+
+# Generate each with: openssl rand -hex 32
+api_token       = ""
+user_jwt_secret = ""
+
+# Social login (each provider is disabled until BOTH its values are set).
+# app_url = the sites stack's app_url output — required for social login;
+# register <app_url>/v1/auth/oauth/<provider>/callback as the redirect URI
+# in each provider's console.
+app_url                = ""
+google_client_id       = ""
+google_client_secret   = ""
+facebook_client_id     = ""
+facebook_client_secret = ""
+apple_client_id        = ""
+apple_client_secret    = "" # pre-generated ES256 JWT; expires, rotate ≤6 months
+
+image_tag = "latest"
+
+# Lock down to the site URLs once known (browsers normally go through
+# CloudFront same-origin, so this only affects direct API calls).
+cors_allowed_origins = ["*"]

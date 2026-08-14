@@ -29,7 +29,7 @@ require (
 	github.com/aws/smithy-go v1.22.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/lee5i3/tcg-api/libs/card-catalog-store v0.0.0 // indirect
-	golang.org/x/crypto v0.40.0 // indirect
+	golang.org/x/crypto v0.52.0 // indirect
 )
 
 replace (
